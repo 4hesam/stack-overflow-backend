@@ -1,21 +1,17 @@
-import { Request } from "express";
+import type { Request } from "express";
 import jwt from "jsonwebtoken";
 
-interface TokenPayload {
-  userId: string;
-}
+interface JwtPayload { userId: string; }
 
-export const getUserFromToken = (req: Request) => {
+export const authMiddleware = ({ req }: { req: Request }) => {
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.replace("Bearer ", "");
+  if (!token) return { user: null };
+
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return null;
-
-    const token = authHeader.replace("Bearer ", "");
-    const secret = process.env.JWT_SECRET!;
-    const decoded = jwt.verify(token, secret) as TokenPayload;
-
-    return decoded.userId;
-  } catch (error) {
-    return null; // توکن معتبر نیست یا وجود نداره
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    return { user: { id: decoded.userId } };
+  } catch {
+    return { user: null };
   }
 };

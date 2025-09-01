@@ -1,8 +1,9 @@
 {
-  "name": "stack-over-backend",
+  "name": "stack-overflow-back",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +13,7 @@
   "dependencies": {
     "apollo-server-express": "^3.13.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.1",
     "express": "^4.21.2",
     "graphql": "^16.11.0",
     "jsonwebtoken": "^9.0.2",
@@ -19,6 +21,8 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
+    "@types/dotenv": "^8.2.3",
+    "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.0",
     "nodemon": "^3.1.10",
