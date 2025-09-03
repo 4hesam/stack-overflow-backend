@@ -8,6 +8,7 @@ export interface IUser extends Document {
   reputation: number;
   createdAt: Date;
   updatedAt: Date;
+  _id: any;
 }
 
 const UserSchema = new Schema<IUser>(
