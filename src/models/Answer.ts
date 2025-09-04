@@ -1,36 +1,26 @@
-import { Schema, model, Document, Types } from "mongoose";
+import { Schema, model, Document, Types } from 'mongoose';
+import { IUser } from './User.js';
+import { IQuestion } from './Question.js';
 
 export interface IAnswer extends Document {
-  author: Types.ObjectId;
-  question: Types.ObjectId;
   content: string;
-  votes: {
-    user: Types.ObjectId;
-    type: "upvote" | "downvote";
-  }[];
-  isAccepted: boolean;
+  question: Types.ObjectId | IQuestion;
+  author: Types.ObjectId | IUser;
   createdAt: Date;
-  updatedAt: Date;
 }
 
-const AnswerSchema = new Schema<IAnswer>(
-  {
-    author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    question: { type: Schema.Types.ObjectId, ref: "Question", required: true },
-    content: {
-      type: String,
-      required: [true, "Answer content is required"],
-      minlength: 5,
-    },
-    votes: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-        type: { type: String, enum: ["upvote", "downvote"], required: true },
-      },
-    ],
-    isAccepted: { type: Boolean, default: false },
-  },
-  { timestamps: true }
-);
+const answerSchema = new Schema<IAnswer>({
+  content: { type: String, required: true },
+  question: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
+  author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-export default model<IAnswer>("Answer", AnswerSchema);
+answerSchema.virtual('voteCount', {
+  ref: 'Vote',
+  localField: '_id',
+  foreignField: 'answer',
+  count: true,
+});
+
+export const Answer = model<IAnswer>('Answer', answerSchema);

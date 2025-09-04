@@ -1,23 +1,25 @@
-import { Schema, model, Types, Document } from "mongoose";
+import { Schema, model, Document, Types } from 'mongoose';
+import { IUser } from './User.js';
+import { IQuestion } from './Question.js';
+import { IAnswer } from './Answer.js';
 
 export interface IVote extends Document {
-  userId: Types.ObjectId;
-  targetId: Types.ObjectId; // می‌تونه سوال یا پاسخ باشه
-  targetType: "Question" | "Answer";
-  vote: 1 | -1;
+  user: Types.ObjectId | IUser;
+  question?: Types.ObjectId | IQuestion;
+  answer?: Types.ObjectId | IAnswer;
+  value: number; // 1 = upvote, -1 = downvote
   createdAt: Date;
-  updatedAt: Date;
 }
 
-const VoteSchema = new Schema<IVote>(
-  {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    targetId: { type: Schema.Types.ObjectId, required: true },
-    targetType: { type: String, enum: ["Question", "Answer"], required: true },
-    vote: { type: Number, enum: [1, -1], required: true },
-  },
-  { timestamps: true }
-);
+const voteSchema = new Schema<IVote>({
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  question: { type: Schema.Types.ObjectId, ref: 'Question' },
+  answer: { type: Schema.Types.ObjectId, ref: 'Answer' },
+  value: { type: Number, enum: [1, -1], required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-const VoteModel = model<IVote>("Vote", VoteSchema);
-export default VoteModel;
+voteSchema.index({ user: 1, question: 1 }, { unique: true, sparse: true });
+voteSchema.index({ user: 1, answer: 1 }, { unique: true, sparse: true });
+
+export const Vote = model<IVote>('Vote', voteSchema);
