@@ -39,8 +39,13 @@ export const root = {
     if (!req.user) throw new Error("Not authenticated");
     const { title, content } = input;
     const question = new Question({ title, content, author: req.user._id });
-    await question.populate("author");
-    return question;
+    await question.save();
+    const populatedQuestion = await question.populate(['author', 'voteCount']);
+;
+    return {
+    ...populatedQuestion.toObject({ virtuals: true }),
+  voteCount: populatedQuestion.voteCount ?? 0 // تضمین می‌کند صفر برگردد
+  };
   },
 
   createAnswer: async ({ input }: { input: CreateAnswerDto }, req: AuthRequest) => {

@@ -6,6 +6,8 @@ export interface IQuestion extends Document {
   content: string;
   author: Types.ObjectId | IUser;
   createdAt: Date;
+  voteCount?: number; 
+
 }
 
 const questionSchema = new Schema<IQuestion>({
