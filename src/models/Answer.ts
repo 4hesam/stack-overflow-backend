@@ -7,6 +7,8 @@ export interface IAnswer extends Document {
   question: Types.ObjectId | IQuestion;
   author: Types.ObjectId | IUser;
   createdAt: Date;
+  voteCount?: number;
+
 }
 
 const answerSchema = new Schema<IAnswer>({

@@ -7,6 +7,7 @@ export interface AuthRequest extends Request {
 }
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  console.log('middleware called ...')
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return next();
 
