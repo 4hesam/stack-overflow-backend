@@ -72,10 +72,14 @@ export const schema = buildSchema(`
   # ------------------------
   # QUERIES & MUTATIONS
   # ------------------------
+   type QuestionPage {
+    questions: [Question!]!
+    total: Int!
+  }
   type Query {
     me: User
-    questions(input: QuestionPaginationInput!): [Question!]!
     question(input: GetQuestionInput!): Question
+     questions(pagination: QuestionPaginationInput!): QuestionPage
   }
 
   input GetQuestionInput {
