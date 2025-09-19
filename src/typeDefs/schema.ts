@@ -39,7 +39,7 @@ export const schema = buildSchema(`
     password: String!
   }
 
-  input LoginInput {
+  input LoginInput  {
     email: String!
     password: String!
   }
@@ -80,6 +80,7 @@ export const schema = buildSchema(`
     me: User
     question(input: GetQuestionInput!): Question
      questions(pagination: QuestionPaginationInput!): QuestionPage
+      questionCount: Int!
   }
 
   input GetQuestionInput {

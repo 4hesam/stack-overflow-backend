@@ -175,7 +175,10 @@ export const root = {
         }
       : null;
   },
-
+  // تعداد سوالات داخل دیتابیس
+  questionCount: async () => {
+  return await Question.countDocuments();
+},
   // ثبت رای روی پاسخ
   voteAnswer: async ({ input }: { input: VoteAnswerDto }, req: AuthRequest) => {
     console.log("api called ...");
