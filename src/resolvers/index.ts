@@ -100,19 +100,24 @@ export const root = {
   },
 
   // گرفتن لیست سوال‌ها
-  questions: async ({ input }: { input: QuestionPaginationDto }) => {
-    const { page, limit } = input;
+  questions: async ({ pagination }: { pagination: QuestionPaginationDto }) => {
+    const { page, limit } = pagination;
     const skip = (page - 1) * limit;
 
-    const questions = await Question.find()
+    const [questions,total] = await Promise.all([
+      Question.find()
       .skip(skip)
       .limit(limit)
-      .populate(["author", "voteCount"]);
-
-    return questions.map((q) => ({
+      .populate(["author", "voteCount"]),
+    Question.countDocuments(),
+  ]);
+    return {
+      questions: questions.map((q) => ({
       ...q.toObject({ virtuals: true }),
       voteCount: q.voteCount ?? 0,
-    }));
+    })),
+    total,
+    };
   },
 
   // گرفتن یک سوال خاص
