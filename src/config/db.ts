@@ -34,7 +34,7 @@ const dataDir = path.resolve(__dirname, "../data");
 
 // تابع لود JSON
 const loadJson = <T>(file: string): T[] => {
-  const filePath = path.resolve(file);
+  const filePath = path.join(dataDir, file);
   if (!fs.existsSync(filePath)) return [];
   const raw = fs.readFileSync(filePath, "utf-8");
   if (!raw) return [];
@@ -42,13 +42,13 @@ const loadJson = <T>(file: string): T[] => {
 };
 
 // لود داده‌ها
-export const users = loadJson<User>(path.join(dataDir, "devforum.users.json"));
-export const questions = loadJson<Question>(path.join(dataDir, "devforum.questions.json"));
-export const answers = loadJson<Answer>(path.join(dataDir, "devforum.answers.json"));
-export const votes = loadJson<Vote>(path.join(dataDir, "devforum.votes.json"));
+export const users = loadJson<User>("devforum.users.json");
+export const questions = loadJson<Question>("devforum.questions.json");
+export const answers = loadJson<Answer>("devforum.answers.json");
+export const votes = loadJson<Vote>("devforum.votes.json");
 
 // تابع ذخیره دوباره داده‌ها
 export const saveJson = <T>(file: string, data: T[]) => {
-  const filePath = path.resolve(file);
+  const filePath = path.join(dataDir, file);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
 };

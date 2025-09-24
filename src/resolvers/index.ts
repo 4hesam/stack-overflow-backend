@@ -234,6 +234,7 @@
 
 //
 // root.ts
+
 import bcrypt from "bcryptjs";
 import { users, questions, answers, votes, saveJson, User, Question, Answer, Vote } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
