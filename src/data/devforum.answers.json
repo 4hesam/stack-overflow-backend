@@ -1,32 +1,16 @@
-[{
-  "_id": {
-    "$oid": "68c168ff546e868c81b76880"
+[
+  {
+    "id": "68c168ff546e868c81b76880",
+    "content": "این پاسخ من به سوال است",
+    "questionId": "64efb3b1f7c6b2d91a7d4d13",
+    "authorId": "68c127197a4b69b9e939a8f1",
+    "createdAt": "2025-09-10T12:03:11.541Z"
   },
-  "content": "این پاسخ من به سوال است",
-  "question": {
-    "$oid": "64efb3b1f7c6b2d91a7d4d13"
-  },
-  "author": {
-    "$oid": "68c127197a4b69b9e939a8f1"
-  },
-  "createdAt": {
-    "$date": "2025-09-10T12:03:11.541Z"
-  },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "68c16a5862e1e7d3bba1d037"
-  },
-  "content": "این پاسخ من به سوال است",
-  "question": {
-    "$oid": "68c12c275acac3de5a9b76bc"
-  },
-  "author": {
-    "$oid": "68c127197a4b69b9e939a8f1"
-  },
-  "createdAt": {
-    "$date": "2025-09-10T12:08:56.291Z"
-  },
-  "__v": 0
-}]
+  {
+    "id": "68c16a5862e1e7d3bba1d037",
+    "content": "این پاسخ من به سوال است",
+    "questionId": "68c12c275acac3de5a9b76bc",
+    "authorId": "68c127197a4b69b9e939a8f1",
+    "createdAt": "2025-09-10T12:08:56.291Z"
+  }
+]

@@ -17,6 +17,7 @@
 // config/db.ts
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from 'url';
 
 // تایپ‌ها
 export interface User { id: string; username: string; email: string; password: string }
@@ -24,20 +25,30 @@ export interface Question { id: string; title: string; content: string; authorId
 export interface Answer { id: string; content: string; questionId: string; authorId: string; voteCount?: number }
 export interface Vote { id: string; userId: string; questionId?: string; answerId?: string; value: 1 | -1 }
 
+// تبدیل import.meta.url به __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// مسیر پوشه داده‌ها
+const dataDir = path.resolve(__dirname, "../data");
+
 // تابع لود JSON
 const loadJson = <T>(file: string): T[] => {
   const filePath = path.resolve(file);
+  if (!fs.existsSync(filePath)) return [];
   const raw = fs.readFileSync(filePath, "utf-8");
+  if (!raw) return [];
   return JSON.parse(raw) as T[];
 };
 
 // لود داده‌ها
-export const users = loadJson<User>("./data/devforum.users.json");
-export const questions = loadJson<Question>("./data/devforum.questions.json");
-export const answers = loadJson<Answer>("./data/devforum.answers.json");
-export const votes = loadJson<Vote>("./data/devforum.votes.json");
+export const users = loadJson<User>(path.join(dataDir, "devforum.users.json"));
+export const questions = loadJson<Question>(path.join(dataDir, "devforum.questions.json"));
+export const answers = loadJson<Answer>(path.join(dataDir, "devforum.answers.json"));
+export const votes = loadJson<Vote>(path.join(dataDir, "devforum.votes.json"));
 
 // تابع ذخیره دوباره داده‌ها
 export const saveJson = <T>(file: string, data: T[]) => {
-  fs.writeFileSync(path.resolve(file), JSON.stringify(data, null, 2), "utf-8");
+  const filePath = path.resolve(file);
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
 };
