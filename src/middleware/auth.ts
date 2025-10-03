@@ -19,3 +19,15 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
   }
   next();
 };
+
+
+// import { getUserFromToken } from "./path-to-your-root-file";
+
+// app.use((req, res, next) => {
+//   const authHeader = req.headers.authorization;
+//   const token = authHeader?.split(" ")[1]; // Expect: Bearer <token>
+//   const userId = getUserFromToken(token);
+//   req.userId = userId || undefined;
+//   next();
+// });
+

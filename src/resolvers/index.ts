@@ -234,10 +234,12 @@
 
 //
 // root.ts
-
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { users, questions, answers, votes, saveJson, User, Question, Answer, Vote } from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
+
+const JWT_SECRET = "your-secret-key"; // بهتره از .env بگیری
 
 interface AuthRequest {
   userId?: string;
@@ -250,6 +252,21 @@ interface CreateAnswerInput { questionId: string; content: string }
 interface PaginationInput { page: number; limit: number }
 interface VoteInput { questionId?: string; answerId?: string; value: 1 | -1 }
 
+// ⬇️ JWT Helper Functions
+const generateToken = (userId: string) => {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
+};
+
+export const getUserFromToken = (token?: string): string | null => {
+  if (!token) return null;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    return decoded.userId;
+  } catch {
+    return null;
+  }
+};
+
 export const root = {
   register: async ({ input }: { input: RegisterInput }) => {
     const { username, email, password } = input;
@@ -260,7 +277,7 @@ export const root = {
     users.push(newUser);
     saveJson("../src/data/devforum.users.json", users);
 
-    const token = "fake-token-" + newUser.id;
+    const token = generateToken(newUser.id);
     return { token, user: newUser };
   },
 
@@ -271,7 +288,7 @@ export const root = {
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new Error("Invalid password");
 
-    const token = "fake-token-" + user.id;
+    const token = generateToken(user.id);
     return { token, user };
   },
 
