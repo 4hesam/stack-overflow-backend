@@ -267,6 +267,8 @@ export const getUserFromToken = (token?: string): string | null => {
   }
 };
 
+// import User from '../models/User.js'
+
 export const root = {
   register: async ({ input }: { input: RegisterInput }) => {
     const { username, email, password } = input;
@@ -292,10 +294,25 @@ export const root = {
     return { token, user };
   },
 
-  me: (_: any, req: AuthRequest) => {
-    if (!req.userId) return null;
-    return users.find(u => u.id === req.userId) || null;
-  },
+ me: async (_: any, req: AuthRequest, args: any, context: any) => {
+  try {
+    const user = context.user; // از JWT میاد
+    if (!user) return null; // یا throw new Error('Unauthorized')
+
+    // گرفتن اطلاعات کاربر از MongoDB
+    // const userData = await User.findById(user.id)
+    //   .populate('questions') // اگر رابطه تعریف شده
+    //   .lean();
+    const userData = users.find(u => u.id === user.id) || null;
+
+
+    return userData || null;
+  } catch (err) {
+    console.error('Error in me resolver:', err);
+    throw new Error('Failed to fetch user');
+  }
+},
+
 
   createQuestion: ({ input }: { input: CreateQuestionInput }, req: AuthRequest) => {
     if (!req.userId) throw new Error("Not authenticated");
@@ -419,5 +436,6 @@ export const root = {
       question: questions.find(q => q.id === a.questionId),
       voteCount
     };
+  
   }
 };

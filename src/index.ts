@@ -31,8 +31,10 @@ import { graphqlHTTP } from 'express-graphql';
 import { schema } from './typeDefs/schema.js';
 import { root } from './resolvers/index.js';
 import { authMiddleware } from './middleware/auth.js';
+import dotenv from 'dotenv'
 
 const app = express();
+dotenv.config()
 
 // Middleware
 app.use(cors());

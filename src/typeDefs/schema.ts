@@ -106,6 +106,7 @@ export const schema = buildSchema(`
     id: ID!
     username: String!
     email: String!
+    questions: [Question]
   }
 
   type Question {
@@ -115,6 +116,7 @@ export const schema = buildSchema(`
     author: User!
     createdAt: String!
     voteCount: Int
+    body: String!
   }
 
   type Answer {
@@ -130,7 +132,9 @@ export const schema = buildSchema(`
     token: String!
     user: User!
   }
-
+type Query {
+    me: User
+  }
   # ------------------------
   # INPUT TYPES
   # ------------------------
