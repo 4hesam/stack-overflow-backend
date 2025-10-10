@@ -253,8 +253,10 @@ interface PaginationInput { page: number; limit: number }
 interface VoteInput { questionId?: string; answerId?: string; value: 1 | -1 }
 
 // ⬇️ JWT Helper Functions
-const generateToken = (userId: string) => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "7d" });
+export const generateToken = (userId: string) => {
+  if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET not defined");
+  console.log("🔐 JWT_SECRET (sign):", process.env.JWT_SECRET); // تست مقدار
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 export const getUserFromToken = (token?: string): string | null => {
@@ -291,22 +293,37 @@ export const root = {
     if (!valid) throw new Error("Invalid password");
 
     const token = generateToken(user.id);
+    console.log('user token: ', token)
     return { token, user };
   },
 
  me: async (_: any, req: AuthRequest, args: any, context: any) => {
   try {
-    const user = context.user; // از JWT میاد
-    if (!user) return null; // یا throw new Error('Unauthorized')
 
     // گرفتن اطلاعات کاربر از MongoDB
     // const userData = await User.findById(user.id)
     //   .populate('questions') // اگر رابطه تعریف شده
     //   .lean();
-    const userData = users.find(u => u.id === user.id) || null;
+   const user = context.user;
+  if (!user) return null;
 
+  const userData = users.find(u => u.id === user.id);
+  if (!userData) return null;
 
-    return userData || null;
+  const myQuestions = questions
+    .filter(q => q.authorId === user.id)
+    .map(q => ({
+      ...q,
+      author: userData,
+      voteCount: votes
+        .filter(v => v.questionId === q.id)
+        .reduce((sum, v) => sum + (v.value ?? 0), 0)
+    }));
+
+  return {
+    ...userData,
+    questions: myQuestions
+  };
   } catch (err) {
     console.error('Error in me resolver:', err);
     throw new Error('Failed to fetch user');

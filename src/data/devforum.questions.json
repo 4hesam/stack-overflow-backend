@@ -1,30 +1,212 @@
 [
   {
-    "id": "68c12c275acac3de5a9b76bc",
-    "title": "اولین سوال من",
-    "content": "این محتوای سوال است",
+    "id": "q1",
+    "title": "How to reverse a linked list in Java?",
+    "content": "I need to reverse a singly linked list efficiently. What is the recommended approach with example code?",
     "authorId": "68c127197a4b69b9e939a8f1",
-    "createdAt": "2025-09-10T07:43:35.412Z"
+    "createdAt": "2025-10-01T08:12:00.000Z"
   },
   {
-    "id": "68c12e655acac3de5a9b76c5",
-    "title": "دومین سوال من",
-    "content": "این محتوای سوال است",
-    "authorId": "68c127197a4b69b9e939a8f1",
-    "createdAt": "2025-09-10T07:53:09.036Z"
+    "id": "q2",
+    "title": "Difference between interface and abstract class in C#",
+    "content": "When should I pick an interface versus an abstract class in C#? What are their pros and cons?",
+    "authorId": "68c120a27a4b69b9e939a8d8",
+    "createdAt": "2025-10-02T09:05:00.000Z"
   },
   {
-    "id": "68c12e695acac3de5a9b76ca",
-    "title": "سومین سوال من",
-    "content": "این محتوای سوال است",
-    "authorId": "68c127197a4b69b9e939a8f1",
-    "createdAt": "2025-09-10T07:53:13.073Z"
+    "id": "q3",
+    "title": "Why is Python list comprehension faster than a loop?",
+    "content": "I've noticed list comprehensions outperform normal for-loops. What's happening under the hood?",
+    "authorId": "68c179255030cce55d551067",
+    "createdAt": "2025-10-03T07:42:00.000Z"
   },
   {
-    "id": "68c165ed03026d74c15e2ad4",
-    "title": "چهارمین سوال من",
-    "content": "این محتوای سوال است",
+    "id": "q4",
+    "title": "Handling null pointer exceptions in Java",
+    "content": "Best strategies to avoid NullPointerException and safely handle nulls in Java applications.",
+    "authorId": "68c179685030cce55d551069",
+    "createdAt": "2025-10-04T11:30:00.000Z"
+  },
+  {
+    "id": "q5",
+    "title": "What is a Promise in JavaScript?",
+    "content": "Explain Promises in JS: states, chaining, error handling, and real-world usage examples.",
+    "authorId": "68cd2b234a0b2356923581ba",
+    "createdAt": "2025-10-05T13:15:00.000Z"
+  },
+  {
+    "id": "q6",
+    "title": "Difference between let and var in JS",
+    "content": "Compare `let` and `var` regarding scope, hoisting, and temporal dead zone in JavaScript.",
+    "authorId": "68cd2d1335bf4a9b0326cb05",
+    "createdAt": "2025-10-06T08:50:00.000Z"
+  },
+  {
+    "id": "q7",
+    "title": "Detecting memory leaks in Node.js",
+    "content": "Tools and techniques to identify and fix memory leaks in Node.js applications.",
     "authorId": "68c127197a4b69b9e939a8f1",
-    "createdAt": "2025-09-10T11:50:05.777Z"
+    "createdAt": "2025-10-07T10:25:00.000Z"
+  },
+  {
+    "id": "q8",
+    "title": "SQL JOIN vs UNION explained",
+    "content": "When to use JOIN compared to UNION in SQL, including performance implications and examples.",
+    "authorId": "68c120a27a4b69b9e939a8d8",
+    "createdAt": "2025-10-08T12:05:00.000Z"
+  },
+  {
+    "id": "q9",
+    "title": "Implementing JWT authentication in Express.js",
+    "content": "Securely use JSON Web Tokens for authentication in an Express.js API.",
+    "authorId": "68c179255030cce55d551067",
+    "createdAt": "2025-10-09T14:20:00.000Z"
+  },
+  {
+    "id": "q10",
+    "title": "Shallow vs deep copy in Python",
+    "content": "Explain shallow and deep copying in Python with examples where they behave differently.",
+    "authorId": "68c179685030cce55d551069",
+    "createdAt": "2025-10-10T09:45:00.000Z"
+  },
+  {
+    "id": "q11",
+    "title": "Centering an element using CSS Flexbox",
+    "content": "How to vertically and horizontally center an element with Flexbox rules.",
+    "authorId": "68cd2b234a0b2356923581ba",
+    "createdAt": "2025-10-11T11:00:00.000Z"
+  },
+  {
+    "id": "q12",
+    "title": "HTTP GET vs POST methods",
+    "content": "Compare GET and POST in terms of semantics, idempotency, and practical uses.",
+    "authorId": "68cd2d1335bf4a9b0326cb05",
+    "createdAt": "2025-10-12T08:30:00.000Z"
+  },
+  {
+    "id": "q13",
+    "title": "Debouncing functions in JavaScript",
+    "content": "What is debouncing, how to implement it in JS, and why it improves performance.",
+    "authorId": "68c127197a4b69b9e939a8f1",
+    "createdAt": "2025-10-13T15:10:00.000Z"
+  },
+  {
+    "id": "q14",
+    "title": "Race conditions in multithreading",
+    "content": "Understand race conditions, see examples, and learn methods to prevent them like locks or atomic operations.",
+    "authorId": "68c120a27a4b69b9e939a8d8",
+    "createdAt": "2025-10-14T09:55:00.000Z"
+  },
+  {
+    "id": "q15",
+    "title": "Efficient API pagination in SQL",
+    "content": "Best practices for paginating large datasets using offset/limit, cursor, or keyset pagination.",
+    "authorId": "68c179255030cce55d551067",
+    "createdAt": "2025-10-15T07:40:00.000Z"
+  },
+  {
+    "id": "q16",
+    "title": "PUT vs PATCH in REST APIs",
+    "content": "Clarify the semantic differences between HTTP PUT and PATCH for updating resources.",
+    "authorId": "68c179685030cce55d551069",
+    "createdAt": "2025-10-16T12:25:00.000Z"
+  },
+  {
+    "id": "q17",
+    "title": "Detecting and handling CORS errors",
+    "content": "What CORS is, how browsers enforce it, and how to configure servers for cross-origin requests.",
+    "authorId": "68cd2b234a0b2356923581ba",
+    "createdAt": "2025-10-17T14:50:00.000Z"
+  },
+  {
+    "id": "q18",
+    "title": "Tail recursion in Java",
+    "content": "Explain tail recursion and whether Java optimizes it. Alternatives if not supported.",
+    "authorId": "68cd2d1335bf4a9b0326cb05",
+    "createdAt": "2025-10-18T08:15:00.000Z"
+  },
+  {
+    "id": "q19",
+    "title": "Preventing SQL injection in PHP",
+    "content": "Techniques like prepared statements and parameterization to secure PHP against SQL injection.",
+    "authorId": "68c127197a4b69b9e939a8f1",
+    "createdAt": "2025-10-19T10:05:00.000Z"
+  },
+  {
+    "id": "q20",
+    "title": "Closures in JavaScript",
+    "content": "Explain JS closures: how inner functions access outer variables, with examples and pitfalls.",
+    "authorId": "68c120a27a4b69b9e939a8d8",
+    "createdAt": "2025-10-20T09:20:00.000Z"
+  },
+  {
+    "id": "q21",
+    "title": "Merge two sorted arrays in O(n)",
+    "content": "Given two sorted arrays, merge them efficiently in linear time complexity.",
+    "authorId": "68c179255030cce55d551067",
+    "createdAt": "2025-10-21T11:40:00.000Z"
+  },
+  {
+    "id": "q22",
+    "title": "Dependency injection explained",
+    "content": "Define dependency injection with examples in Java or C#, and explain benefits like decoupling.",
+    "authorId": "68c179685030cce55d551069",
+    "createdAt": "2025-10-22T13:55:00.000Z"
+  },
+  {
+    "id": "q23",
+    "title": "Binary search tree insert & search",
+    "content": "Implement insertion and search in a BST with code explanation.",
+    "authorId": "68cd2b234a0b2356923581ba",
+    "createdAt": "2025-10-23T07:30:00.000Z"
+  },
+  {
+    "id": "q24",
+    "title": "Synchronous vs asynchronous programming",
+    "content": "Compare synchronous and asynchronous programming with examples in JS and Python.",
+    "authorId": "68cd2d1335bf4a9b0326cb05",
+    "createdAt": "2025-10-24T10:45:00.000Z"
+  },
+  {
+    "id": "q25",
+    "title": "Using map, filter, reduce in functional programming",
+    "content": "Explain map, filter, reduce functions and their use cases with practical examples.",
+    "authorId": "68c127197a4b69b9e939a8f1",
+    "createdAt": "2025-10-25T08:15:00.000Z"
+  },
+  {
+    "id": "q26",
+    "title": "Node.js event loop explained",
+    "content": "Describe the Node.js event loop phases and how async callbacks are handled.",
+    "authorId": "68c120a27a4b69b9e939a8d8",
+    "createdAt": "2025-10-26T11:30:00.000Z"
+  },
+  {
+    "id": "q27",
+    "title": "Writing unit tests in Python with pytest",
+    "content": "How to write test functions, use fixtures, parameterization, and best practices in pytest.",
+    "authorId": "68c179255030cce55d551067",
+    "createdAt": "2025-10-27T09:05:00.000Z"
+  },
+  {
+    "id": "q28",
+    "title": "Microservices vs monolithic architectures",
+    "content": "Compare microservices and monoliths: advantages, disadvantages, and when to choose each.",
+    "authorId": "68c179685030cce55d551069",
+    "createdAt": "2025-10-28T12:45:00.000Z"
+  },
+  {
+    "id": "q29",
+    "title": "Serialize and deserialize JSON in Java",
+    "content": "Use Jackson or Gson to convert Java objects to and from JSON with examples.",
+    "authorId": "68cd2b234a0b2356923581ba",
+    "createdAt": "2025-10-29T08:20:00.000Z"
+  },
+  {
+    "id": "q30",
+    "title": "Cross-Site Scripting (XSS) prevention",
+    "content": "What XSS attacks are, their types, and strategies to prevent them in web apps.",
+    "authorId": "68cd2d1335bf4a9b0326cb05",
+    "createdAt": "2025-10-30T14:55:00.000Z"
   }
 ]
