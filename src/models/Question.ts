@@ -6,8 +6,7 @@ export interface IQuestion extends Document {
   content: string;
   author: Types.ObjectId | IUser;
   createdAt: Date;
-  voteCount?: number; 
-
+  voteCount?: number;
 }
 
 const questionSchema = new Schema<IQuestion>({
@@ -25,3 +24,4 @@ questionSchema.virtual('voteCount', {
 });
 
 export const Question = model<IQuestion>('Question', questionSchema);
+  

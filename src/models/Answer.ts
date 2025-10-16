@@ -8,7 +8,6 @@ export interface IAnswer extends Document {
   author: Types.ObjectId | IUser;
   createdAt: Date;
   voteCount?: number;
-
 }
 
 const answerSchema = new Schema<IAnswer>({

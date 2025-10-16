@@ -234,225 +234,218 @@
 
 //
 // root.ts
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { users, questions, answers, votes, saveJson, User, Question, Answer, Vote } from "../config/db.js";
-import { v4 as uuidv4 } from "uuid";
-
-const JWT_SECRET = "your-secret-key"; // بهتره از .env بگیری
-
-interface AuthRequest {
-  userId?: string;
-}
+import { User } from '../models/User.js';
+import { Question } from '../models/Question.js';
+import { Answer } from '../models/Answer.js';
+import { Vote } from '../models/Vote.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
 interface RegisterInput { username: string; email: string; password: string }
 interface LoginInput { email: string; password: string }
 interface CreateQuestionInput { title: string; content: string }
 interface CreateAnswerInput { questionId: string; content: string }
-interface PaginationInput { page: number; limit: number }
 interface VoteInput { questionId?: string; answerId?: string; value: 1 | -1 }
+interface PaginationInput { page: number; limit: number }
 
-// ⬇️ JWT Helper Functions
 export const generateToken = (userId: string) => {
   if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET not defined");
-  console.log("🔐 JWT_SECRET (sign):", process.env.JWT_SECRET); // تست مقدار
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
-
-export const getUserFromToken = (token?: string): string | null => {
-  if (!token) return null;
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
-    return decoded.userId;
-  } catch {
-    return null;
-  }
-};
-
-// import User from '../models/User.js'
 
 export const root = {
   register: async ({ input }: { input: RegisterInput }) => {
     const { username, email, password } = input;
-    if (users.find(u => u.email === email)) throw new Error("Email already exists");
+    const existing = await User.findOne({ email });
+    if (existing) throw new Error("Email already exists");
 
     const hashed = await bcrypt.hash(password, 10);
-    const newUser: User = { id: uuidv4(), username, email, password: hashed };
-    users.push(newUser);
-    saveJson("../src/data/devforum.users.json", users);
+    const newUser = await User.create({ username, email, password: hashed });
 
-    const token = generateToken(newUser.id);
-    return { token, user: newUser };
+    const userId = (newUser._id as Types.ObjectId).toString();
+    const token = generateToken(userId);
+
+    return { token, user: { ...newUser.toObject(), id: userId } };
   },
 
   login: async ({ input }: { input: LoginInput }) => {
-    const user = users.find(u => u.email === input.email);
+    const user = await User.findOne({ email: input.email });
     if (!user) throw new Error("User not found");
 
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new Error("Invalid password");
 
-    const token = generateToken(user.id);
-    console.log('user token: ', token)
-    return { token, user };
+    const userId = (user._id as Types.ObjectId).toString();
+    const token = generateToken(userId);
+
+    return { token, user: { ...user.toObject(), id: userId } };
   },
 
- me: async (_: any, req: AuthRequest, args: any, context: any) => {
-  try {
+  me: async (_: any, args: any, context: any) => {
+    const user = context.user;
+    if (!user) return null;
 
-    // گرفتن اطلاعات کاربر از MongoDB
-    // const userData = await User.findById(user.id)
-    //   .populate('questions') // اگر رابطه تعریف شده
-    //   .lean();
-   const user = context.user;
-  if (!user) return null;
+    const myQuestions = await Question.find({ author: user._id }).lean();
+    const questionsWithVotes = await Promise.all(
+      myQuestions.map(async q => {
+        const voteCount = await Vote.countDocuments({ question: q._id });
+        return { ...q, id: (q._id as Types.ObjectId).toString(), voteCount };
+      })
+    );
 
-  const userData = users.find(u => u.id === user.id);
-  if (!userData) return null;
+    return { ...user.toObject(), id: (user._id as Types.ObjectId).toString(), questions: questionsWithVotes };
+  },
 
-  const myQuestions = questions
-    .filter(q => q.authorId === user.id)
-    .map(q => ({
-      ...q,
-      author: userData,
-      voteCount: votes
-        .filter(v => v.questionId === q.id)
-        .reduce((sum, v) => sum + (v.value ?? 0), 0)
-    }));
+  createQuestion: async ({ input }: { input: CreateQuestionInput }, _: any, context: any) => {
+    if (!context.user) throw new Error("Not authenticated");
 
-  return {
-    ...userData,
-    questions: myQuestions
-  };
-  } catch (err) {
-    console.error('Error in me resolver:', err);
-    throw new Error('Failed to fetch user');
-  }
-},
-
-
-  createQuestion: ({ input }: { input: CreateQuestionInput }, req: AuthRequest) => {
-    if (!req.userId) throw new Error("Not authenticated");
-
-    const newQ: Question = {
-      id: uuidv4(),
+    const newQ = await Question.create({
       title: input.title,
       content: input.content,
-      authorId: req.userId,
-      createdAt: new Date().toISOString(),
-      voteCount: 0
+      author: context.user._id,
+      createdAt: new Date(),
+    });
+
+    return {
+      ...newQ.toObject(),
+      id: (newQ._id as Types.ObjectId).toString(),
+      author: {
+        id: (context.user._id as Types.ObjectId).toString(),
+        username: context.user.username,
+        email: context.user.email,
+      },
+      voteCount: 0,
     };
-
-    questions.push(newQ);
-    saveJson("../src/data/devforum.questions.json", questions);
-
-    return { ...newQ, author: users.find(u => u.id === req.userId), voteCount: 0 };
   },
 
-  createAnswer: ({ input }: { input: CreateAnswerInput }, req: AuthRequest) => {
-    if (!req.userId) throw new Error("Not authenticated");
+  createAnswer: async ({ input }: { input: CreateAnswerInput }, _: any, context: any) => {
+    if (!context.user) throw new Error("Not authenticated");
 
-    const question = questions.find(q => q.id === input.questionId);
+    const question = await Question.findById(input.questionId);
     if (!question) throw new Error("Question not found");
 
-    const newA: Answer = {
-      id: uuidv4(),
+    const newA = await Answer.create({
       content: input.content,
-      questionId: question.id,
-      authorId: req.userId,
-      voteCount: 0
+      question: question._id,
+      author: context.user._id,
+      createdAt: new Date(),
+    });
+
+    return {
+      ...newA.toObject(),
+      id: (newA._id as Types.ObjectId).toString(),
+      author: {
+        id: (context.user._id as Types.ObjectId).toString(),
+        username: context.user.username,
+        email: context.user.email,
+      },
+      question: { id: (question._id as Types.ObjectId).toString(), title: question.title },
+      voteCount: 0,
     };
-
-    answers.push(newA);
-    saveJson("../src/data/devforum.answers.json", answers);
-
-    return { ...newA, author: users.find(u => u.id === req.userId), question, voteCount: 0 };
   },
 
-  questions: ({ pagination }: { pagination: PaginationInput }) => {
+  questions: async ({ pagination }: { pagination: PaginationInput }) => {
     const { page, limit } = pagination;
-    const start = (page - 1) * limit;
-    const end = start + limit;
+    const skip = (page - 1) * limit;
+    const questions = await Question.find().skip(skip).limit(limit).lean();
 
-    const pagedQuestions = questions.slice(start, end).map(q => ({
-      ...q,
-      author: users.find(u => u.id === q.authorId),
-      voteCount: votes
-        .filter(v => v.questionId === q.id)
-        .reduce((sum, v) => sum + (v.value ?? 0), 0)
-    }));
+    const questionsWithVotes = await Promise.all(
+      questions.map(async q => {
+        const author = await User.findById(q.author);
+        const voteCount = await Vote.countDocuments({ question: q._id });
+        return {
+          ...q,
+          id: (q._id as Types.ObjectId).toString(),
+          author: author
+            ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+            : null,
+          voteCount,
+        };
+      })
+    );
 
-    return { questions: pagedQuestions, total: questions.length };
+    const total = await Question.countDocuments();
+    return { questions: questionsWithVotes, total };
   },
 
-  question: ({ input }: { input: { id: string } }) => {
-    const q = questions.find(q => q.id === input.id);
+  question: async ({ input }: { input: { id: string } }) => {
+    const q = await Question.findById(input.id).lean();
     if (!q) return null;
 
+    const author = await User.findById(q.author);
+    const voteCount = await Vote.countDocuments({ question: q._id });
+
     return {
       ...q,
-      author: users.find(u => u.id === q.authorId),
-      voteCount: votes
-        .filter(v => v.questionId === q.id)
-        .reduce((sum, v) => sum + (v.value ?? 0), 0)
+      id: (q._id as Types.ObjectId).toString(),
+      author: author
+        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        : null,
+      voteCount,
     };
   },
 
-  voteQuestion: ({ input }: { input: VoteInput }, req: AuthRequest) => {
-    if (!req.userId) throw new Error("Not authenticated");
+  voteQuestion: async ({ input }: { input: VoteInput }, _: any, context: any) => {
+    if (!context.user) throw new Error("Not authenticated");
     if (!input.questionId) throw new Error("Question ID required");
 
-    const q = questions.find(q => q.id === input.questionId);
-    if (!q) throw new Error("Question not found");
+    const question = await Question.findById(input.questionId);
+    if (!question) throw new Error("Question not found");
 
-    let vote = votes.find(v => v.userId === req.userId && v.questionId === q.id);
+    let vote = await Vote.findOne({ user: context.user._id, question: question._id });
     if (vote) {
       vote.value = input.value!;
+      await vote.save();
     } else {
-      vote = { id: uuidv4(), userId: req.userId, questionId: q.id, value: input.value! };
-      votes.push(vote);
+      vote = await Vote.create({ user: context.user._id, question: question._id, value: input.value! });
     }
 
-    saveJson("../src/data/devforum.votes.json", votes);
-
-    const voteCount = votes
-      .filter(v => v.questionId === q.id)
-      .reduce((sum, v) => sum + (v.value ?? 0), 0);
+    const voteCount = await Vote.countDocuments({ question: question._id });
+    const author = await User.findById(question.author);
 
     return {
-      ...q,
-      author: users.find(u => u.id === q.authorId),
-      voteCount
+      ...question.toObject(),
+      id: (question._id as Types.ObjectId).toString(),
+      author: author
+        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        : null,
+      voteCount,
     };
   },
 
-  voteAnswer: ({ input }: { input: VoteInput }, req: AuthRequest) => {
-    if (!req.userId) throw new Error("Not authenticated");
+  voteAnswer: async ({ input }: { input: VoteInput }, _: any, context: any) => {
+    if (!context.user) throw new Error("Not authenticated");
     if (!input.answerId) throw new Error("Answer ID required");
 
-    const a = answers.find(a => a.id === input.answerId);
-    if (!a) throw new Error("Answer not found");
+    const answer = await Answer.findById(input.answerId);
+    if (!answer) throw new Error("Answer not found");
 
-    let vote = votes.find(v => v.userId === req.userId && v.answerId === a.id);
+    let vote = await Vote.findOne({ user: context.user._id, answer: answer._id });
     if (vote) {
       vote.value = input.value!;
+      await vote.save();
     } else {
-      vote = { id: uuidv4(), userId: req.userId, answerId: a.id, questionId: a.questionId, value: input.value! };
-      votes.push(vote);
+      vote = await Vote.create({
+        user: context.user._id,
+        answer: answer._id,
+        question: answer.question,
+        value: input.value!,
+      });
     }
 
-    saveJson("../src/data/devforum.votes.json", votes);
-
-    const voteCount = votes
-      .filter(v => v.answerId && v.answerId === a.id)
-      .reduce((sum, v) => sum + (v.value ?? 0), 0);
+    const voteCount = await Vote.countDocuments({ answer: answer._id });
+    const author = await User.findById(answer.author);
+    const question = await Question.findById(answer.question);
 
     return {
-      ...a,
-      author: users.find(u => u.id === a.authorId),
-      question: questions.find(q => q.id === a.questionId),
-      voteCount
+      ...answer.toObject(),
+      id: (answer._id as Types.ObjectId).toString(),
+      author: author
+        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        : null,
+      question: question ? { id: (question._id as Types.ObjectId).toString(), title: question.title } : null,
+      voteCount,
     };
-  
-  }
+  },
 };

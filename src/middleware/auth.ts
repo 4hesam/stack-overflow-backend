@@ -27,7 +27,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { User } from '../models/User.js';
 
 export interface AuthRequest extends Request {
-  user?: any;
+  user?: any; // User document از MongoDB بدون فیلد password
 }
 
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -35,14 +35,12 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
   const authHeader = req.headers.authorization;
 
-  // اگر هدر نباشه، کاربر بدون لاگین ادامه می‌دهد
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // اگر هدر نباشه، ادامه بدون لاگین
     return next();
   }
 
   const token = authHeader.split(' ')[1];
-
-  // ✅ با این خطا TypeScript ۱۰۰٪ حل می‌شود:
   if (!token) {
     console.warn('⚠️ No token provided');
     return next();
@@ -53,19 +51,20 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
   try {
     const decoded = jwt.verify(token, secret) as JwtPayload;
 
-    if (!decoded || typeof decoded !== 'object' || !('id' in decoded)) {
+    // بررسی payload معتبر
+    if (!decoded || typeof decoded !== 'object' || !('userId' in decoded)) {
       console.warn('⚠️ Invalid token payload');
       return next();
     }
 
-    const user = await User.findById((decoded as any).id).select('-password');
-
+    // کاربر از MongoDB لود می‌شود
+    const user = await User.findById((decoded as any).userId).select('-password');
     if (!user) {
       console.warn('⚠️ User not found for given token');
       return next();
     }
 
-    req.user = user;
+    req.user = user; // کاربر در context قرار می‌گیرد
     next();
   } catch (error) {
     console.warn('⚠️ Invalid or expired token');
