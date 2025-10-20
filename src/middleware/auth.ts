@@ -64,6 +64,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
       return next();
     }
 
+    console.log('user: ', user)
     req.user = user; // کاربر در context قرار می‌گیرد
     next();
   } catch (error) {

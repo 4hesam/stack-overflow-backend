@@ -99,9 +99,9 @@
 //
 //
 
-import { buildSchema } from "graphql";
+// import { buildSchema } from "graphql";
 
-export const schema = buildSchema(`
+export const typeDefs =`
   type User {
     id: ID!
     username: String!
@@ -198,4 +198,4 @@ export const schema = buildSchema(`
     voteQuestion(input: VoteQuestionInput!): Question!
     voteAnswer(input: VoteAnswerInput!): Answer!
   }
-`);
+`;

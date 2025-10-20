@@ -234,24 +234,44 @@
 
 //
 // root.ts
-import { User } from '../models/User.js';
-import { Question } from '../models/Question.js';
-import { Answer } from '../models/Answer.js';
-import { Vote } from '../models/Vote.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { Types } from 'mongoose';
+import { User } from "../models/User.js";
+import { Question } from "../models/Question.js";
+import { Answer } from "../models/Answer.js";
+import { Vote } from "../models/Vote.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
 
-interface RegisterInput { username: string; email: string; password: string }
-interface LoginInput { email: string; password: string }
-interface CreateQuestionInput { title: string; content: string }
-interface CreateAnswerInput { questionId: string; content: string }
-interface VoteInput { questionId?: string; answerId?: string; value: 1 | -1 }
-interface PaginationInput { page: number; limit: number }
+interface RegisterInput {
+  username: string;
+  email: string;
+  password: string;
+}
+interface LoginInput {
+  email: string;
+  password: string;
+}
+interface CreateQuestionInput {
+  title: string;
+  content: string;
+}
+interface CreateAnswerInput {
+  questionId: string;
+  content: string;
+}
+interface VoteInput {
+  questionId?: string;
+  answerId?: string;
+  value: 1 | -1;
+}
+interface PaginationInput {
+  page: number;
+  limit: number;
+}
 
 export const generateToken = (userId: string) => {
   if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET not defined");
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
 export const root = {
@@ -288,38 +308,59 @@ export const root = {
 
     const myQuestions = await Question.find({ author: user._id }).lean();
     const questionsWithVotes = await Promise.all(
-      myQuestions.map(async q => {
+      myQuestions.map(async (q) => {
         const voteCount = await Vote.countDocuments({ question: q._id });
         return { ...q, id: (q._id as Types.ObjectId).toString(), voteCount };
       })
     );
 
-    return { ...user.toObject(), id: (user._id as Types.ObjectId).toString(), questions: questionsWithVotes };
-  },
-
-  createQuestion: async ({ input }: { input: CreateQuestionInput }, _: any, context: any) => {
-    if (!context.user) throw new Error("Not authenticated");
-
-    const newQ = await Question.create({
-      title: input.title,
-      content: input.content,
-      author: context.user._id,
-      createdAt: new Date(),
-    });
-
     return {
-      ...newQ.toObject(),
-      id: (newQ._id as Types.ObjectId).toString(),
-      author: {
-        id: (context.user._id as Types.ObjectId).toString(),
-        username: context.user.username,
-        email: context.user.email,
-      },
-      voteCount: 0,
+      ...user.toObject(),
+      id: (user._id as Types.ObjectId).toString(),
+      questions: questionsWithVotes,
     };
   },
 
-  createAnswer: async ({ input }: { input: CreateAnswerInput }, _: any, context: any) => {
+  createQuestion: async (
+    { input }: { input: CreateQuestionInput },
+    _: any,
+    context: any
+  ) => {
+    try {
+      console.log('user', context.user)
+      if (!context.user) throw new Error("Not authenticated");
+
+      const newQ = await Question.create({
+        title: input.title,
+        content: input.content,
+        author: context.user._id,
+        createdAt: new Date(),
+      });
+
+      return {
+        ...newQ.toObject(),
+        id: (newQ._id as Types.ObjectId).toString(),
+        author: {
+          id: (context.user._id as Types.ObjectId).toString(),
+          username: context.user.username,
+          email: context.user.email,
+        },
+        voteCount: 0,
+      };
+    } catch (error: any) {
+      console.log("error addquestion ", error.message);
+      return {
+        status: 'failure', 
+        message: "Something went wrong !",
+      }
+    }
+  },
+
+  createAnswer: async (
+    { input }: { input: CreateAnswerInput },
+    _: any,
+    context: any
+  ) => {
     if (!context.user) throw new Error("Not authenticated");
 
     const question = await Question.findById(input.questionId);
@@ -340,7 +381,10 @@ export const root = {
         username: context.user.username,
         email: context.user.email,
       },
-      question: { id: (question._id as Types.ObjectId).toString(), title: question.title },
+      question: {
+        id: (question._id as Types.ObjectId).toString(),
+        title: question.title,
+      },
       voteCount: 0,
     };
   },
@@ -351,14 +395,18 @@ export const root = {
     const questions = await Question.find().skip(skip).limit(limit).lean();
 
     const questionsWithVotes = await Promise.all(
-      questions.map(async q => {
+      questions.map(async (q) => {
         const author = await User.findById(q.author);
         const voteCount = await Vote.countDocuments({ question: q._id });
         return {
           ...q,
           id: (q._id as Types.ObjectId).toString(),
           author: author
-            ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+            ? {
+                id: (author._id as Types.ObjectId).toString(),
+                username: author.username,
+                email: author.email,
+              }
             : null,
           voteCount,
         };
@@ -380,25 +428,40 @@ export const root = {
       ...q,
       id: (q._id as Types.ObjectId).toString(),
       author: author
-        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        ? {
+            id: (author._id as Types.ObjectId).toString(),
+            username: author.username,
+            email: author.email,
+          }
         : null,
       voteCount,
     };
   },
 
-  voteQuestion: async ({ input }: { input: VoteInput }, _: any, context: any) => {
+  voteQuestion: async (
+    { input }: { input: VoteInput },
+    _: any,
+    context: any
+  ) => {
     if (!context.user) throw new Error("Not authenticated");
     if (!input.questionId) throw new Error("Question ID required");
 
     const question = await Question.findById(input.questionId);
     if (!question) throw new Error("Question not found");
 
-    let vote = await Vote.findOne({ user: context.user._id, question: question._id });
+    let vote = await Vote.findOne({
+      user: context.user._id,
+      question: question._id,
+    });
     if (vote) {
       vote.value = input.value!;
       await vote.save();
     } else {
-      vote = await Vote.create({ user: context.user._id, question: question._id, value: input.value! });
+      vote = await Vote.create({
+        user: context.user._id,
+        question: question._id,
+        value: input.value!,
+      });
     }
 
     const voteCount = await Vote.countDocuments({ question: question._id });
@@ -408,7 +471,11 @@ export const root = {
       ...question.toObject(),
       id: (question._id as Types.ObjectId).toString(),
       author: author
-        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        ? {
+            id: (author._id as Types.ObjectId).toString(),
+            username: author.username,
+            email: author.email,
+          }
         : null,
       voteCount,
     };
@@ -421,7 +488,10 @@ export const root = {
     const answer = await Answer.findById(input.answerId);
     if (!answer) throw new Error("Answer not found");
 
-    let vote = await Vote.findOne({ user: context.user._id, answer: answer._id });
+    let vote = await Vote.findOne({
+      user: context.user._id,
+      answer: answer._id,
+    });
     if (vote) {
       vote.value = input.value!;
       await vote.save();
@@ -442,9 +512,18 @@ export const root = {
       ...answer.toObject(),
       id: (answer._id as Types.ObjectId).toString(),
       author: author
-        ? { id: (author._id as Types.ObjectId).toString(), username: author.username, email: author.email }
+        ? {
+            id: (author._id as Types.ObjectId).toString(),
+            username: author.username,
+            email: author.email,
+          }
         : null,
-      question: question ? { id: (question._id as Types.ObjectId).toString(), title: question.title } : null,
+      question: question
+        ? {
+            id: (question._id as Types.ObjectId).toString(),
+            title: question.title,
+          }
+        : null,
       voteCount,
     };
   },

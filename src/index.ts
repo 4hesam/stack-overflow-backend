@@ -1,4 +1,3 @@
-
 // import express from 'express';
 // import cors from 'cors';
 // import dotenv from 'dotenv';
@@ -61,43 +60,62 @@
 // // ✅ PORT
 // const PORT = process.env.PORT || 4000;
 // app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+import express, { Request, Response, NextFunction } from "express";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
 
-//// src/index.ts
-import express from 'express';
-import { graphqlHTTP } from 'express-graphql';
-import dotenv from 'dotenv';
-import { connectDB } from './config/db.js';
-import { authMiddleware } from './middleware/auth.js';
-import { schema } from './typeDefs/schema.js';
-import { root } from './resolvers/index.js';
+import { connectDB } from "./config/db.js";
+import { authMiddleware } from "./middleware/auth.js";
+import { typeDefs } from "./typeDefs/schema.js";
+import { root } from "./resolvers/index.js";
 
 dotenv.config();
-await connectDB();
 
-const app = express();
-const PORT = process.env.PORT || 4000;
-import cors from 'cors';
+const startServer = async () => {
+  // اتصال به MongoDB
+  await connectDB();
 
-app.use(cors({
-  origin: 'http://localhost:9000', // اجازه به فرانت‌اند شما
-  credentials: true,               // اگر از کوکی یا Authorization استفاده می‌کنید
-}));
+  const app = express();
+  const PORT = process.env.PORT || 4000;
 
-// JWT Middleware قبل از graphqlHTTP اجرا شود
-app.use(authMiddleware);
+  // تنظیم CORS
+  app.use(
+    cors({
+      origin: "http://localhost:9000",
+      credentials: true,
+    })
+  );
 
-// مسیر GraphQL با context
-app.use(
-  '/graphql',
-  graphqlHTTP((req) => ({
-    schema,
-    rootValue: root,
-    context: { user: (req as any).user },
-    graphiql: true,
-  }))
-);
+  // ساخت Apollo Server
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers: root,
+  });
 
+  await server.start();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}/graphql`);
+  // مسیر GraphQL با middleware احراز هویت
+  app.use(
+    "/graphql",
+    bodyParser.json(),
+    authMiddleware,
+    expressMiddleware(server, {
+      context: async ({ req }: { req: any }) => ({
+        user: req.user,
+      }),
+    })
+  );
+
+  // اجرای سرور
+  app.listen(PORT, () => {
+    console.log(`🚀 سرور GraphQL در http://localhost:${PORT}/graphql فعاله ✅`);
+  });
+};
+
+// اجرای تابع async و گرفتن خطا در صورت وجود
+startServer().catch((err) => {
+  console.error("❌ خطا در اجرای سرور:", err);
 });
