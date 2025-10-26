@@ -101,7 +101,9 @@
 
 // import { buildSchema } from "graphql";
 
-export const typeDefs =`
+import { gql } from "apollo-server";
+
+export const typeDefs = gql`
   type User {
     id: ID!
     username: String!
@@ -141,7 +143,7 @@ export const typeDefs =`
     password: String!
   }
 
-  input LoginInput  {
+  input LoginInput {
     email: String!
     password: String!
   }
